@@ -6,14 +6,15 @@
 
 {% block main %}
     <form action="/register" method="post">
+        {% csrf_token %}
         <div class="mb-3">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text" maxlength="20">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" maxlength="20" required>
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password" minlength="6">
+            <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" minlength="6" required>
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Confirm Password" type="password" minlength="6">
+            <input class="form-control mx-auto w-auto" id="confirmation" name="confirmation" placeholder="Confirm Password" type="password" minlength="6" required>
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
     </form>
