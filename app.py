@@ -42,3 +42,14 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
+
+
+@app.route("/search")
+def search():
+    """Search for mobile suits"""
+
+    # Get the search query from the request
+    query = request.args.get("query")
+
+    # For now, just render the search results page with the query
+    return render_template("search_results.html", query=query)
