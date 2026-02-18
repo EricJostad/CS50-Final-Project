@@ -1,9 +1,14 @@
 import os
+from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gundam.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
 
 
 @app.route("/")
@@ -20,6 +25,18 @@ def login():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+
+        if not request.form.get("username") or not request.form.get("password"):
+            return render_template("login.html", error="Must provide username and password")
+
+        users = db.execute("SELECT * FROM users WHERE username = ?",
+                           (request.form.get("username"),)).fetchall()
+
+        if len(users) != 1 or not check_password_hash(users[0]["password"], request.form.get("password")):
+            return render_template("login.html", error="Invalid username or password")
+
+        # Remember which user has logged in
+        session["user_id"] = users[0]["id"]
 
         # Redirect user to home page
         return redirect("/")
