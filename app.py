@@ -8,6 +8,11 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gundam.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 db = SQLAlchemy(app)
 
 
@@ -30,7 +35,7 @@ def login():
             return render_template("login.html", error="Must provide username and password")
 
         users = db.execute("SELECT * FROM users WHERE username = ?",
-                           (request.form.get("username"),)).fetchall()
+                           (request.form.get("username")))
 
         if len(users) != 1 or not check_password_hash(users[0]["password"], request.form.get("password")):
             return render_template("login.html", error="Invalid username or password")
