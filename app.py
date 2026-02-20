@@ -78,9 +78,9 @@ def register():
         # Hash the password and insert the new user into the database
         hash = generate_password_hash(request.form.get("password"))
         try:
-            db.execute("INSERT INTO users (username, password) VALUES (?, ?)",
-                       (request.form.get("username"), hash))
-            db.commit()
+            db.session.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+                               (request.form.get("username"), hash))
+            db.session.commit()
         except ValueError:
             return render_template("register.html", error="Username already taken")
 
