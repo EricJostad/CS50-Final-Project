@@ -69,6 +69,21 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
+            return render_template("register.html", error="Must provide username and password")
+
+        if request.form.get("password") != request.form.get("confirmation"):
+            return render_template("register.html", error="Passwords do not match")
+
+        # Hash the password and insert the new user into the database
+        hash = generate_password_hash(request.form.get("password"))
+        try:
+            db.execute("INSERT INTO users (username, password) VALUES (?, ?)",
+                       (request.form.get("username"), hash))
+            db.commit()
+        except ValueError:
+            return render_template("register.html", error="Username already taken")
+
         # Redirect user to login page
         return redirect("/login")
 
