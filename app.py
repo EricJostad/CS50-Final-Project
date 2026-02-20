@@ -34,8 +34,8 @@ def login():
         if not request.form.get("username") or not request.form.get("password"):
             return render_template("login.html", error="Must provide username and password")
 
-        users = db.execute("SELECT * FROM users WHERE username = ?",
-                           (request.form.get("username")))
+        users = db.session.execute("SELECT * FROM users WHERE username = ?",
+                                   (request.form.get("username")))
 
         if len(users) != 1 or not check_password_hash(users[0]["password"], request.form.get("password")):
             return render_template("login.html", error="Invalid username or password")
