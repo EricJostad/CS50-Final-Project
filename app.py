@@ -1,5 +1,7 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -69,19 +71,24 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
+        if not username or not password or not confirmation:
             return render_template("register.html", error="Must provide username and password")
 
-        if request.form.get("password") != request.form.get("confirmation"):
+        if password != confirmation:
             return render_template("register.html", error="Passwords do not match")
 
         # Hash the password and insert the new user into the database
-        hash = generate_password_hash(request.form.get("password"))
+        hashed_password = generate_password_hash(password)
         try:
-            db.session.execute("INSERT INTO users (username, password) VALUES (?, ?)",
-                               (request.form.get("username"), hash))
+            db.session.execute(text("INSERT INTO users (username, password) VALUES (:username, :password)"),
+                               {"username": username, "password": hashed_password})
             db.session.commit()
-        except ValueError:
+        except IntegrityError:
+            db.session.rollback()
             return render_template("register.html", error="Username already taken")
 
         # Redirect user to login page
