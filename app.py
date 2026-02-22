@@ -7,7 +7,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///gundam.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:\\Users\\ericj\\Productivity\\Coding\\CS50\\project\\gundam.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
