@@ -6,6 +6,8 @@ from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from models import User
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:\\Users\\ericj\\Productivity\\Coding\\CS50\\project\\gundam.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -83,15 +85,16 @@ def register():
         if password != confirmation:
             return render_template("register.html", error="Passwords do not match")
 
+        # Check if username already exists
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            return render_template("register.html", error="Username already taken")
+
         # Hash the password and insert the new user into the database
         hashed_password = generate_password_hash(password)
-        try:
-            db.session.execute(text("INSERT INTO users (username, password) VALUES (:username, :password)"),
-                               {"username": username, "password": hashed_password})
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            return render_template("register.html", error="Username already taken")
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
 
         # Redirect user to login page
         return redirect("/login")
