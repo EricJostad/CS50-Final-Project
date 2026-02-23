@@ -40,14 +40,13 @@ def login():
         if not username or not password:
             return render_template("login.html", error="Must provide username and password")
 
-        users = db.session.execute(text("SELECT * FROM users WHERE username = :username"),
-                                   {"username": username}).fetchall()
+        user = User.query.filter_by(username=username).first()
 
-        if len(users) != 1 or not check_password_hash(users[0]["password"], password):
+        if not user or not check_password_hash(user.password, password):
             return render_template("login.html", error="Invalid username or password")
 
         # Remember which user has logged in
-        session["user_id"] = users[0]["id"]
+        session["user_id"] = user.id
 
         # Redirect user to home page
         return redirect("/")
