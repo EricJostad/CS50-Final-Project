@@ -110,3 +110,7 @@ def search():
 
     # For now, just render the search results page with the query
     return render_template("search_results.html", query=query)
+
+
+with app.app_context():
+    db.create_all()
