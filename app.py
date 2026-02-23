@@ -1,18 +1,15 @@
 import os
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import User
+from models import db, User
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:\\Users\\ericj\\Productivity\\Coding\\CS50\\project\\gundam.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
