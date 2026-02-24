@@ -6,8 +6,14 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import db, User
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:\\Users\\ericj\\Productivity\\Coding\\CS50\\project\\gundam.db"
+app = Flask(__name__, instance_relative_config=True)
+
+# Ensure instance folder exists
+os.makedirs(app.instance_path, exist_ok=True)
+
+# Use absolute path for the database
+db_path = os.path.join(app.instance_path, "gundam.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
@@ -15,6 +21,9 @@ db.init_app(app)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+print("SQLAlchemy DB URI:", app.config["SQLALCHEMY_DATABASE_URI"])
+print("Instance folder:", app.instance_path)
 
 
 @app.route("/")
