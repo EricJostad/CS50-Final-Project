@@ -5,7 +5,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import db, User
-from helpers import login_required
+from helpers import get_mobile_suit, login_required
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -117,8 +117,9 @@ def search():
     # Get the search query from the request
     query = request.args.get("query")
 
+    results = get_mobile_suit(query)
     # For now, just render the search results page with the query
-    return render_template("search_results.html", query=query)
+    return render_template("search_results.html", results=results)
 
 
 with app.app_context():
