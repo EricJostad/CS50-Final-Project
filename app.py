@@ -119,7 +119,7 @@ def search():
 
     results = get_mobile_suit(query)
     # For now, just render the search results page with the query
-    return render_template("search_results.html", results=results)
+    return render_template("search_results.html", results=results, query=query)
 
 
 with app.app_context():
