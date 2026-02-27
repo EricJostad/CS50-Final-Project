@@ -6,7 +6,7 @@
     <h1>Search Results for "{{ query }}"</h1>
     <ul>
     {% for suit in results %}
-        <li>{{ suit.gundamName }} ({{ suit.wikiName }}) - {{ suit.header }}</li>
+        <li>{{ suit.gundamName }} ({{ suit.wikiName }}) - {{ suit.header }} <img src="{{ suit.imgUrl }}" alt="{{ suit.gundamName }}" width="200" height="200"></li>
     {% else %}
         <li>No results found.</li>
     {% endfor %}

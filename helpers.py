@@ -30,12 +30,14 @@ def get_mobile_suit(name):
         gname = suit.get("gundamName", "")
         wname = suit.get("wikiName", "")
         header = suit.get("header", "")
+        image = suit.get("imgUrl", "")
 
         # Match against any available field
         if (
             name in gname.lower()
             or name in wname.lower()
             or name in header.lower()
+            or name in image.lower()
         ):
             filtered.append(suit)
 
