@@ -6,9 +6,23 @@
     <h1>Search Results for "{{ query }}"</h1>
     <ul>
     {% for suit in results %}
-        <li>{{ suit.gundamName }} ({{ suit.wikiName }}) - {{ suit.header }} <img src="{{ suit.imgUrl }}" alt="{{ suit.gundamName }}" width="200" height="200"></li>
+        <li>
+            <h2>{{ suit.title }}</h2>
+
+            {% if suit.image_url %}
+                <img src="{{ suit.image_url }}" alt="{{ suit.title }} image" style="max-width: 200px;">
+            {% endif %}
+
+            <p>Model Number: {{ suit.model_number or "Unknown"}}</p>
+            <p>Manufacturer: {{ suit.manufacturer or "Unknown" }}</p>
+            <p>Height: {{ suit.height or "Unknown" }}</p>
+
+            <p><a href="{{ suit.wiki_url }}" target="_blank">View Details</a></p>
+        </li>
+
     {% else %}
         <li>No results found.</li>
     {% endfor %}
+    </ul>
     <p>Displaying results for your search query.</p>
 {% endblock %}
