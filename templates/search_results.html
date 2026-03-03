@@ -10,7 +10,7 @@
             <h2>{{ suit.title }}</h2>
 
             {% if suit.image_url %}
-                <img src="{{ suit.image_url }}" alt="{{ suit.title }} image" style="max-width: 200px;">
+                <img src="{{ suit.image_url | safe | trim }}" alt="{{ suit.title }} image" style="max-width: 200px;">
             {% endif %}
 
             <p>Model Number: {{ suit.model_number or "Unknown"}}</p>

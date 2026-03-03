@@ -118,6 +118,10 @@ def search():
     query = request.args.get("query")
 
     results = get_mobile_suit(query)
+
+    for suit in results:
+        print(suit["title"], "->", suit["image_url"])
+
     # For now, just render the search results page with the query
     return render_template("search_results.html", results=results, query=query)
 
