@@ -4,16 +4,27 @@
 
 {% block content %}
     <h1>Search Results for "{{ query }}"</h1>
+
     <ul>
     {% for suit in results %}
         <li>
             <h2>{{ suit.title }}</h2>
 
+            <!-- Wiki Image -->
             {% if suit.image_url %}
-                <img src="{{ suit.image_url | safe | trim }}" alt="{{ suit.title }} image" style="max-width: 200px;">
+                <img src="{{ suit.image_url | safe | trim }}"
+                     alt="{{ suit.title }} wiki image"
+                     style="max-width: 200px; margin-bottom: 10px;">
             {% endif %}
 
-            <p>Model Number: {{ suit.model_number or "Unknown"}}</p>
+            <!-- Google Image -->
+            {% if suit.google_image %}
+                <img src="{{ suit.google_image }}"
+                     alt="{{ suit.title }} google image"
+                     style="max-width: 200px; margin-bottom: 10px;">
+            {% endif %}
+
+            <p>Model Number: {{ suit.model_number or "Unknown" }}</p>
             <p>Manufacturer: {{ suit.manufacturer or "Unknown" }}</p>
             <p>Height: {{ suit.height or "Unknown" }}</p>
 
@@ -22,7 +33,8 @@
 
     {% else %}
         <li>No results found.</li>
-    {% endfor %}z
-    </ul> 
+    {% endfor %}
+    </ul>
+
     <p>Displaying results for your search query.</p>
 {% endblock %}
