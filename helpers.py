@@ -160,8 +160,8 @@ def get_mobile_suit(name):
     response = cached_get(WIKI_API, params=params)
     pages = response.json().get("query", {}).get("search", [])
 
-    # Limit to top result for simplicity (can be expanded later)
-    pages = pages[:1]
+    # Limit to top 3
+    pages = pages[:3]
 
     # Parallelize processing of each page
     with ThreadPoolExecutor(max_workers=3) as executor:
