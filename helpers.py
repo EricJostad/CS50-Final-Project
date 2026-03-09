@@ -15,11 +15,8 @@ load_dotenv()
 
 WIKI_API = "https://gundam.fandom.com/api.php"
 
-# -----------------------------
-# LOGIN DECORATOR
-# -----------------------------
 
-
+# Login required decorator
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -29,9 +26,7 @@ def login_required(f):
     return decorated_function
 
 
-# -----------------------------
-# SIMPLE WIKI REQUEST CACHE
-# -----------------------------
+# Simple in-memory cache for wiki API responses
 wiki_cache = {}
 
 
@@ -44,9 +39,7 @@ def cached_get(url, params=None):
     return resp
 
 
-# -----------------------------
-# GOOGLE IMAGE FETCHER (CACHED)
-# -----------------------------
+# Google image search with caching and error handling
 @lru_cache(maxsize=200)
 def get_first_google_image(query):
     """Return the first Google Images result URL using SerpAPI."""
@@ -77,16 +70,14 @@ def get_first_google_image(query):
     return None  # fallback
 
 
-# -----------------------------
-# PARSE INFOBOX FIELDS (LIGHTER)
-# -----------------------------
+# Parse wiki infobox for model number, manufacturer, height[will change specific fields later]
 def parse_infobox(title):
     """Extract model number, manufacturer, height from wiki infobox."""
     params = {
         "action": "parse",
         "page": title,
         "prop": "text",
-        "section": 0,   # Only fetch top section (faster)
+        "section": 0,
         "format": "json",
         "origin": "*"
     }
@@ -127,9 +118,7 @@ def parse_infobox(title):
         return None, None, None
 
 
-# -----------------------------
-# PROCESS A SINGLE RESULT (for threading)
-# -----------------------------
+# Process a single wiki page to extract all relevant info
 def process_page(page):
     title = page["title"]
     wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
@@ -154,9 +143,7 @@ def process_page(page):
     }
 
 
-# -----------------------------
-# MAIN SEARCH FUNCTION
-# -----------------------------
+# Main function to search Gundam Wiki and return structured data
 def get_mobile_suit(name):
     """Search Gundam Wiki and return structured mobile suit data."""
     name = name.lower()
@@ -173,8 +160,8 @@ def get_mobile_suit(name):
     response = cached_get(WIKI_API, params=params)
     pages = response.json().get("query", {}).get("search", [])
 
-    # Limit to top 3
-    pages = pages[:3]
+    # Limit to top result for simplicity (can be expanded later)
+    pages = pages[:1]
 
     # Parallelize processing of each page
     with ThreadPoolExecutor(max_workers=3) as executor:
