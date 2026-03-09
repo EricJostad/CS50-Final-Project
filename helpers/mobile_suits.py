@@ -1,76 +1,17 @@
 # Standard library
-import os
 from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache, wraps
 
 # Third-party libraries
 from bs4 import BeautifulSoup
-from flask import g, redirect, request, url_for
-from serpapi import GoogleSearch
-import requests
 
-# Load environment variables
-from dotenv import load_dotenv
-load_dotenv()
+# Local application imports
+from .utils import cached_get
+from .google_images import get_first_google_image
+
 
 WIKI_API = "https://gundam.fandom.com/api.php"
 
 
-# Login required decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if g.user is None:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-# Simple in-memory cache for wiki API responses
-wiki_cache = {}
-
-
-def cached_get(url, params=None):
-    key = (url, tuple(sorted((params or {}).items())))
-    if key in wiki_cache:
-        return wiki_cache[key]
-    resp = requests.get(url, params=params, timeout=3)
-    wiki_cache[key] = resp
-    return resp
-
-
-# Google image search with caching and error handling
-@lru_cache(maxsize=200)
-def get_first_google_image(query):
-    """Return the first Google Images result URL using SerpAPI."""
-    api_key = os.getenv("SERPAPI_KEY")
-
-    if not api_key:
-        print("ERROR: SERPAPI_KEY missing from environment")
-        return None
-
-    params = {
-        "engine": "google",
-        "q": query,
-        "tbm": "isch",
-        "api_key": api_key
-    }
-
-    try:
-        search = GoogleSearch(params)
-        results = search.get_dict()
-
-        images = results.get("images_results", [])
-        if images:
-            return images[0].get("original") or images[0].get("thumbnail")
-
-    except Exception as e:
-        print("SerpAPI error:", e)
-
-    return None  # fallback
-
-
-# Parse wiki infobox for model number, manufacturer, height[will change specific fields later]
 def parse_infobox(title):
     """Extract model number, manufacturer, height from wiki infobox."""
     params = {
@@ -118,8 +59,8 @@ def parse_infobox(title):
         return None, None, None
 
 
-# Process a single wiki page to extract all relevant info
 def process_page(page):
+    """Process a single wiki search result page."""
     title = page["title"]
     wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
 
@@ -143,12 +84,10 @@ def process_page(page):
     }
 
 
-# Main function to search Gundam Wiki and return structured data
 def get_mobile_suit(name):
     """Search Gundam Wiki and return structured mobile suit data."""
     name = name.lower()
 
-    # Search for matching pages
     params = {
         "action": "query",
         "list": "search",

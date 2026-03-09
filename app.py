@@ -8,7 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # Local application imports
-from helpers import get_mobile_suit, login_required
+from helpers.mobile_suits import get_mobile_suit
+from helpers.auth import login_required
 from models import User, db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -37,14 +38,12 @@ def index():
 def login():
     """Log user in"""
 
-    # Forget any user_id
     session.clear()
 
-    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         username = request.form.get("username")
         password = request.form.get("password")
+
         if not username or not password:
             return render_template("login.html", error="Must provide username and password")
 
@@ -53,25 +52,16 @@ def login():
         if not user or not check_password_hash(user.password, password):
             return render_template("login.html", error="Invalid username or password")
 
-        # Remember which user has logged in
         session["user_id"] = user.id
-
-        # Redirect user to home page
         return redirect("/")
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("login.html")
+    return render_template("login.html")
 
 
 @app.route("/logout")
 def logout():
     """Log user out"""
-
-    # Forget any user_id
     session.clear()
-
-    # Redirect user to login form
     return redirect("/")
 
 
@@ -79,9 +69,7 @@ def logout():
 def register():
     """Register user"""
 
-    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         username = request.form.get("username")
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
@@ -92,34 +80,25 @@ def register():
         if password != confirmation:
             return render_template("register.html", error="Passwords do not match")
 
-        # Check if username already exists
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return render_template("register.html", error="Username already taken")
 
-        # Hash the password and insert the new user into the database
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
-        # Redirect user to login page
         return redirect("/login")
 
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("register.html")
+    return render_template("register.html")
 
 
 @app.route("/search")
 def search():
     """Search for mobile suits"""
-
-    # Get the search query from the request
     query = request.args.get("query")
-
     results = get_mobile_suit(query)
-    # For now, just render the search results page with the query
     return render_template("search_results.html", results=results, query=query)
 
 
