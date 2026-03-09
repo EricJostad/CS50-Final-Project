@@ -1,9 +1,13 @@
-from functools import wraps
-from flask import g, request, redirect, url_for
-import requests
-from bs4 import BeautifulSoup
-from serpapi import GoogleSearch
+# Standard library
 import os
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache, wraps
+
+# Third-party libraries
+from bs4 import BeautifulSoup
+from flask import g, redirect, request, url_for
+from serpapi import GoogleSearch
+import requests
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -11,7 +15,9 @@ load_dotenv()
 
 WIKI_API = "https://gundam.fandom.com/api.php"
 
-# Required login decorator
+# -----------------------------
+# LOGIN DECORATOR
+# -----------------------------
 
 
 def login_required(f):
@@ -23,12 +29,28 @@ def login_required(f):
     return decorated_function
 
 
-# Google image fetcher via SerpAPI
+# -----------------------------
+# SIMPLE WIKI REQUEST CACHE
+# -----------------------------
+wiki_cache = {}
+
+
+def cached_get(url, params=None):
+    key = (url, tuple(sorted((params or {}).items())))
+    if key in wiki_cache:
+        return wiki_cache[key]
+    resp = requests.get(url, params=params, timeout=3)
+    wiki_cache[key] = resp
+    return resp
+
+
+# -----------------------------
+# GOOGLE IMAGE FETCHER (CACHED)
+# -----------------------------
+@lru_cache(maxsize=200)
 def get_first_google_image(query):
     """Return the first Google Images result URL using SerpAPI."""
-
     api_key = os.getenv("SERPAPI_KEY")
-    print("DEBUG SERPAPI_KEY =", api_key)  # DEBUG
 
     if not api_key:
         print("ERROR: SERPAPI_KEY missing from environment")
@@ -37,7 +59,7 @@ def get_first_google_image(query):
     params = {
         "engine": "google",
         "q": query,
-        "tbm": "isch",  # REQUIRED for Google Images
+        "tbm": "isch",
         "api_key": api_key
     }
 
@@ -46,20 +68,95 @@ def get_first_google_image(query):
         results = search.get_dict()
 
         images = results.get("images_results", [])
-        print("DEBUG GOOGLE IMAGES RAW =", images[:1])  # DEBUG
-
         if images:
             return images[0].get("original") or images[0].get("thumbnail")
-
-        print("DEBUG: No Google images found for:", query)
 
     except Exception as e:
         print("SerpAPI error:", e)
 
-    return None
+    return None  # fallback
 
 
-# Gundam Fandom Wiki scraper
+# -----------------------------
+# PARSE INFOBOX FIELDS (LIGHTER)
+# -----------------------------
+def parse_infobox(title):
+    """Extract model number, manufacturer, height from wiki infobox."""
+    params = {
+        "action": "parse",
+        "page": title,
+        "prop": "text",
+        "section": 0,   # Only fetch top section (faster)
+        "format": "json",
+        "origin": "*"
+    }
+
+    try:
+        resp = cached_get(WIKI_API, params=params)
+        parsed = resp.json()
+
+        html = parsed.get("parse", {}).get("text", {}).get("*", "")
+        soup = BeautifulSoup(html, "html.parser")
+
+        model_number = None
+        manufacturer = None
+        height = None
+
+        # Lighter selector: only .pi-data rows
+        for row in soup.select(".pi-data"):
+            label = row.find(class_="pi-data-label")
+            value = row.find(class_="pi-data-value")
+
+            if not label or not value:
+                continue
+
+            key = label.get_text(strip=True).lower()
+            val = value.get_text(" ", strip=True)
+
+            if "model" in key:
+                model_number = val
+            elif "manufacturer" in key:
+                manufacturer = val
+            elif "height" in key:
+                height = val
+
+        return model_number, manufacturer, height
+
+    except Exception as e:
+        print("Wiki parse error:", e)
+        return None, None, None
+
+
+# -----------------------------
+# PROCESS A SINGLE RESULT (for threading)
+# -----------------------------
+def process_page(page):
+    title = page["title"]
+    wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
+
+    # No wiki image scraping
+    image_url = None
+
+    # Infobox fields
+    model_number, manufacturer, height = parse_infobox(title)
+
+    # SerpAPI image (cached + fallback)
+    google_image = get_first_google_image(title + " gundam")
+
+    return {
+        "title": title,
+        "wiki_url": wiki_url,
+        "image_url": image_url,
+        "google_image": google_image,
+        "model_number": model_number,
+        "manufacturer": manufacturer,
+        "height": height,
+    }
+
+
+# -----------------------------
+# MAIN SEARCH FUNCTION
+# -----------------------------
 def get_mobile_suit(name):
     """Search Gundam Wiki and return structured mobile suit data."""
     name = name.lower()
@@ -73,85 +170,14 @@ def get_mobile_suit(name):
         "origin": "*"
     }
 
-    response = requests.get(WIKI_API, params=params)
-    response.raise_for_status()
+    response = cached_get(WIKI_API, params=params)
     pages = response.json().get("query", {}).get("search", [])
 
-    results = []
+    # Limit to top 3
+    pages = pages[:3]
 
-    for page in pages[:3]:  # Limit to top 3 results for performance
-        title = page["title"]
-        wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
-
-        print("\n==============================")
-        print("DEBUG START:", title)
-        print("==============================")
-
-        # ----------------------------------------
-        # REMOVE WIKI IMAGE SCRAPING — USE NONE
-        # ----------------------------------------
-        image_url = None
-        print("DEBUG WIKI IMAGE URL = None (disabled)")  # DEBUG
-
-        # Extract infobox text fields
-        model_number = None
-        manufacturer = None
-        height = None
-
-        try:
-            parse_params = {
-                "action": "parse",
-                "page": title,
-                "prop": "text",
-                "format": "json",
-                "origin": "*"
-            }
-
-            parse_response = requests.get(WIKI_API, params=parse_params)
-            parse_response.raise_for_status()
-            parsed = parse_response.json()
-
-            html = parsed.get("parse", {}).get("text", {}).get("*", "")
-            soup = BeautifulSoup(html, "html.parser")
-
-            for row in soup.select(".pi-data, tr"):
-                label = row.find(class_="pi-data-label") or row.find("th")
-                value = row.find(class_="pi-data-value") or row.find("td")
-
-                if not label or not value:
-                    continue
-
-                key = label.get_text(strip=True).lower()
-                val = value.get_text(" ", strip=True)
-
-                if "model" in key:
-                    model_number = val
-                elif "manufacturer" in key:
-                    manufacturer = val
-                elif "height" in key:
-                    height = val
-
-        except Exception as e:
-            print("Wiki parse error:", e)
-
-        # Google Image (SerpAPI)
-        google_image = get_first_google_image(title + " gundam")
-
-        print("DEBUG GOOGLE IMAGE URL =", google_image)  # DEBUG
-
-        # Final structured result for this page
-        result_obj = {
-            "title": title,
-            "wiki_url": wiki_url,
-            "image_url": image_url,  # always None now
-            "google_image": google_image,
-            "model_number": model_number,
-            "manufacturer": manufacturer,
-            "height": height,
-        }
-
-        print("DEBUG FINAL RESULT =", result_obj)  # DEBUG
-
-        results.append(result_obj)
+    # Parallelize processing of each page
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        results = list(executor.map(process_page, pages))
 
     return results

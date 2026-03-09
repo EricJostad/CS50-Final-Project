@@ -1,11 +1,15 @@
+# Standard library
 import os
-from sqlalchemy.exc import IntegrityError
-from flask import Flask, render_template, request, session, redirect
+
+# Third-party libraries
+from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from models import db, User
+# Local application imports
 from helpers import get_mobile_suit, login_required
+from models import User, db
 
 app = Flask(__name__, instance_relative_config=True)
 

@@ -1,5 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
+# Standard library
 from datetime import datetime
+
+# Third-party libraries
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
