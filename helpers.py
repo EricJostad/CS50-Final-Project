@@ -87,44 +87,11 @@ def get_mobile_suit(name):
         print("DEBUG START:", title)
         print("==============================")
 
-        # Extract main image from Wiki
+        # ----------------------------------------
+        # REMOVE WIKI IMAGE SCRAPING — USE NONE
+        # ----------------------------------------
         image_url = None
-
-        try:
-            file_params = {
-                "action": "query",
-                "titles": title,
-                "prop": "images",
-                "format": "json",
-                "origin": "*"
-            }
-
-            file_resp = requests.get(WIKI_API, params=file_params).json()
-            pages_dict = file_resp.get("query", {}).get("pages", {})
-
-            for _, p in pages_dict.items():
-                images = p.get("images", [])
-                print("DEBUG WIKI IMAGES LIST =", images[:1])  # DEBUG
-
-                if images:
-                    file_title = images[0]["title"]
-                    file_page_url = f"https://gundam.fandom.com/wiki/{file_title.replace(' ', '_')}"
-                    file_html = requests.get(file_page_url).text
-                    file_soup = BeautifulSoup(file_html, "html.parser")
-
-                    full_img = file_soup.find("a", class_="image")
-                    if full_img:
-                        img = full_img.find("img")
-                        if img:
-                            src = img.get("src")
-                            if src.startswith("//"):
-                                src = "https:" + src
-                            image_url = src
-
-        except Exception as e:
-            print("Wiki image error:", e)
-
-        print("DEBUG WIKI IMAGE URL =", image_url)  # DEBUG
+        print("DEBUG WIKI IMAGE URL = None (disabled)")  # DEBUG
 
         # Extract infobox text fields
         model_number = None
@@ -176,7 +143,7 @@ def get_mobile_suit(name):
         result_obj = {
             "title": title,
             "wiki_url": wiki_url,
-            "image_url": image_url,
+            "image_url": image_url,  # always None now
             "google_image": google_image,
             "model_number": model_number,
             "manufacturer": manufacturer,
