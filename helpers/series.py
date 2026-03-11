@@ -49,11 +49,11 @@ def parse_infobox(title):
             elif "episodes" in key:
                 episodes = val
 
-        return aired, episodes, None
+        return aired, episodes
 
     except Exception as e:
         print("Wiki parse error:", e)
-        return None, None, None
+        return None, None
 
 
 def process_page(page):

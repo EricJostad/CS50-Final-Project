@@ -1,5 +1,6 @@
 # Standard library
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 # Third-party libraries
 from flask import Flask, redirect, render_template, request, session
@@ -9,6 +10,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 # Local application imports
 from helpers.mobile_suits import get_mobile_suit
+from helpers.series import get_series
 from helpers.auth import login_required
 from models import User, db
 
@@ -96,10 +98,22 @@ def register():
 
 @app.route("/search")
 def search():
-    """Search for mobile suits"""
-    query = request.args.get("query")
-    results = get_mobile_suit(query)
-    return render_template("search_results.html", results=results, query=query)
+    """Search Gundam wiki for user query and display results."""
+    query = request.args.get("query", "").strip()
+
+    if not query:
+        return render_template("search_results.html", results={})
+
+    results = {}
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        mobile_suit_future = executor.submit(get_mobile_suit, query)
+        series_future = executor.submit(get_series, query)
+
+        results["mobile_suits"] = mobile_suit_future.result()
+        results["series"] = series_future.result()
+
+    return render_template("search_results.html", results=results)
 
 
 with app.app_context():
