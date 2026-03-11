@@ -1,6 +1,5 @@
 # Standard library
 import os
-from concurrent.futures import ThreadPoolExecutor
 
 # Third-party libraries
 from flask import Flask, redirect, render_template, request, session
@@ -96,24 +95,38 @@ def register():
     return render_template("register.html")
 
 
+def classify_query(query):
+    """Simple heuristic to classify query as 'mobile_suit' or 'series'."""
+    query = query.lower()
+
+    series_keywords = ["anime", "episode", "film",
+                       "season", "series", "show", "movie", "ova", "tv"]
+
+    if any(keyword in query for keyword in series_keywords):
+        return "series"
+
+    else:
+        # Default to mobile suit if unsure
+        return "mobile_suit"
+
+
 @app.route("/search")
 def search():
     """Search Gundam wiki for user query and display results."""
     query = request.args.get("query", "").strip()
 
     if not query:
-        return render_template("search_results.html", results={})
+        return render_template("search_results.html", results={}, query=query)
 
+    category = classify_query(query)
     results = {}
 
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        mobile_suit_future = executor.submit(get_mobile_suit, query)
-        series_future = executor.submit(get_series, query)
+    if category == "mobile_suit":
+        results["mobile_suits"] = get_mobile_suit(query)
+    else:
+        results["series"] = get_series(query)
 
-        results["mobile_suits"] = mobile_suit_future.result()
-        results["series"] = series_future.result()
-
-    return render_template("search_results.html", results=results)
+    return render_template("search_results.html", results=results, query=query)
 
 
 with app.app_context():
