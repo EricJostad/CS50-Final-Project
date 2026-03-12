@@ -35,15 +35,17 @@ def parse_gunpla_kits(title):
                 header = h
                 break
 
+        # No kits listed
         if not header:
-            return []  # No kits listed
+            return []
 
         kits = []
 
         # Walk through siblings until next header
         for sib in header.find_next_siblings():
             if sib.name in ["h2", "h3"]:
-                break  # End of Gunpla section
+                # End of Gunpla section
+                break
 
             for li in sib.find_all("li"):
                 text = li.get_text(" ", strip=True)
@@ -94,8 +96,8 @@ def get_gunpla_kit(query):
         data = resp.json()
         pages = data.get("query", {}).get("search", [])
 
-        # Limit to top 5 results for performance
-        pages = pages[:5]
+        # Limit to top 3 results for performance
+        pages = pages[:3]
 
         with ThreadPoolExecutor(max_workers=5) as executor:
             results = list(executor.map(process_page, pages))
