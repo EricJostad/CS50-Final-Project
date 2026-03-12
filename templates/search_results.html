@@ -3,57 +3,67 @@
 {% block title %}Search Results{% endblock %}
 
 {% block content %}
-    <h1>Search Results for "{{ query }}"</h1>
+<h1>Search Results for "{{ query }}"</h1>
 
-    {% if not results.mobile_suits and not results.series %}
-        <p>No results found.</p>
-    {% else %}
+{% set has_ms = results.mobile_suits is defined and results.mobile_suits %}
+{% set has_series = results.series is defined and results.series %}
+{% set has_kits = results.model_kits is defined and results.model_kits %}
+
+{% if not has_ms and not has_series and not has_kits %}
+    <p>No results found.</p>
+
+{% else %}
+
+    {# ---------------------- Mobile Suits ---------------------- #}
+    {% if has_ms %}
         <h2>Mobile Suits</h2>
         <ul>
         {% for suit in results.mobile_suits %}
             <li>
                 <h3>{{ suit.title }}</h3>
 
-                <!-- Google Image -->
                 {% if suit.google_image %}
                     <img src="{{ suit.google_image }}"
-                        alt="{{ suit.title }} google image"
-                        style="max-width: 200px; margin-bottom: 10px;">
+                         alt="{{ suit.title }}"
+                         style="max-width: 200px; margin-bottom: 10px;">
                 {% endif %}
 
-                <p>Model Number: {{ suit.model_number if suit.model_number else "Unknown" }}</p>
-                <p>Manufacturer: {{ suit.manufacturer if suit.manufacturer else "Unknown" }}</p>
-                <p>Height: {{ suit.height if suit.height else "Unknown" }}</p>
+                <p><strong>Model Number:</strong> {{ suit.model_number or "Unknown" }}</p>
+                <p><strong>Manufacturer:</strong> {{ suit.manufacturer or "Unknown" }}</p>
+                <p><strong>Height:</strong> {{ suit.height or "Unknown" }}</p>
 
-                {% if suit.wiki_url %}
-                    <p><a href="{{ suit.wiki_url }}" target="_blank">View Details</a></p>
-                {% else %}
-                    <p>View Details: Unknown</p>
-                {% endif %}
+                <p><a href="{{ suit.wiki_url }}" target="_blank">View Details</a></p>
             </li>
         {% endfor %}
         </ul>
-        
-        {% if results.series %}
-            <ul>
-            {% for series in results.series %}
-                <li>
-                    <h3>{{ series.title }}</h3>
-
-                    <!-- Google Image -->
-                    {% if series.google_image %}
-                        <img src="{{ series.google_image }}"
-                            alt="{{ series.title }} google image"
-                            style="max-width: 200px; margin-bottom: 10px;">
-                    {% endif %}
-
-                    <p>Aired: {{ series.aired if series.aired else "Unknown" }}</p>
-                    <p>Episodes: {{ series.episodes if series.episodes else "Unknown" }}</p>
-                </li>
-            {% endfor %}
-            </ul>
-        {% endif %}
     {% endif %}
 
-    <p>Displaying results for your search query. Click <a href="{{ url_for('index') }}">here</a> to start a new search.</p>
+
+    {# ---------------------- Series ---------------------- #}
+    {% if has_series %}
+        <h2>Series</h2>
+        <ul>
+        {% for series in results.series %}
+            <li>
+                <h3>{{ series.title }}</h3>
+
+                {% if series.google_image %}
+                    <img src="{{ series.google_image }}"
+                         alt="{{ series.title }}"
+                         style="max-width: 200px; margin-bottom: 10px;">
+                {% endif %}
+
+                <p><strong>Aired:</strong> {{ series.aired or "Unknown" }}</p>
+                <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
+
+                <p><a href="{{ series.wiki_url }}" target="_blank">View Details</a></p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+{% endif %}
+
+<p>Click <a href="{{ url_for('index') }}">here</a> to start a new search.</p>
+
 {% endblock %}

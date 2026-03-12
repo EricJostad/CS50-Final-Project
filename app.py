@@ -99,7 +99,7 @@ def classify_query(query):
     """Simple heuristic to classify query as 'mobile_suit' or 'series'."""
     query = query.lower()
 
-    series_keywords = ["anime", "episode", "film",
+    series_keywords = ["anime", "episode", "film", "gundam",
                        "season", "series", "show", "movie", "ova", "tv"]
 
     if any(keyword in query for keyword in series_keywords):
