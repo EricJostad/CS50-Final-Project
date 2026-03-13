@@ -62,29 +62,6 @@
         </ul>
     {% endif %}
 
-    {# ---------------------- Gundam Kits ---------------------- #}
-    {% if has_kits %}
-        <h2>Gundam Kits</h2>
-        <ul>
-        {% for kit in results.model_kits %}
-            <li>
-                <h3>{{ kit.title }}</h3>
-
-                {% if kit.google_image %}
-                    <img src="{{ kit.google_image }}"
-                         alt="{{ kit.title }}"
-                         style="max-width: 200px; margin-bottom: 10px;">
-                {% endif %}
-
-                <p><strong>Scale:</strong> {{ kit.scale or "Unknown" }}</p>
-                <p><strong>Grade:</strong> {{ kit.grade or "Unknown" }}</p>
-
-                <p><a href="{{ kit.wiki_url }}" target="_blank">View Wiki</a></p>
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-
 {% endif %}
 
 <p>Click <a href="{{ url_for('index') }}">here</a> to start a new search.</p>

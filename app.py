@@ -10,7 +10,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # Local application imports
 from helpers.mobile_suits import get_mobile_suit
 from helpers.series import get_series
-from helpers.gundam_kits import get_gunpla_kit
 from helpers.auth import login_required
 from models import User, db
 
@@ -103,15 +102,8 @@ def classify_query(query):
     series_keywords = ["anime", "episode", "film", "gundam",
                        "season", "series", "show", "movie", "ova", "tv"]
 
-    kits_keywords = ["gunpla", "model kit", "hg", "mg", "pg", "rg",
-                     "real grade", "master grade", "high grade", "perfect grade",
-                     "scale model", "model", "kit", "1/144", "1/100", "1/60    "]
-
     if any(keyword in query for keyword in series_keywords):
         return "series"
-
-    elif any(keyword in query for keyword in kits_keywords):
-        return "kits"
 
     else:
         # Default to mobile suit if unsure
@@ -131,10 +123,8 @@ def search():
 
     if category == "mobile_suit":
         results["mobile_suits"] = get_mobile_suit(query)
-    elif category == "series":
-        results["series"] = get_series(query)
     else:
-        results["kits"] = get_gunpla_kit(query)
+        results["series"] = get_series(query)
 
     return render_template("search_results.html", results=results, query=query)
 
