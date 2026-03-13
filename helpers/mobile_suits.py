@@ -82,10 +82,7 @@ def parse_infobox(title):
             elif "manufacturer" in key:
                 manufacturer = val
 
-            elif "height" in key:
-                height = val
-
-        return model_number, manufacturer, height
+        return model_number, manufacturer
 
     except Exception as e:
         print("Wiki parse error:", e)
@@ -100,14 +97,13 @@ def process_page(page):
     official_model, aka_name = parse_title_model_and_name(title)
 
     # Infobox fields (optional fallback)
-    model_number, manufacturer, height = parse_infobox(title)
+    model_number, manufacturer = parse_infobox(title)
 
     google_image = get_first_google_image(title + " gundam")
 
     return {
         "title": title,
         "wiki_url": wiki_url,
-        "image_url": None,
         "google_image": google_image,
         # fallback to title if model number not found in infobox
         "model_number": model_number or official_model,
