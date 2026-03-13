@@ -131,8 +131,9 @@ def search():
 
     if category == "mobile_suit":
         results["mobile_suits"] = get_mobile_suit(query)
-    else:
+    elif category == "series":
         results["series"] = get_series(query)
+    else:
         results["kits"] = get_gunpla_kit(query)
 
     return render_template("search_results.html", results=results, query=query)
