@@ -40,7 +40,7 @@ def parse_title_model_and_name(title):
 
 
 def parse_infobox(title):
-    """Extract model number, manufacturer, height from wiki infobox."""
+    """Extract model number, aka title, and manufacturer from wiki infobox."""
     params = {
         "action": "parse",
         "page": title,
@@ -59,7 +59,6 @@ def parse_infobox(title):
 
         model_number = None
         manufacturer = None
-        height = None
 
         for row in soup.select(".pi-data"):
             label = row.find(class_="pi-data-label")
@@ -90,7 +89,7 @@ def parse_infobox(title):
 
     except Exception as e:
         print("Wiki parse error:", e)
-        return None, None, None
+        return None, None
 
 
 def process_page(page):
@@ -115,7 +114,6 @@ def process_page(page):
         "official_model": official_model,
         "aka_name": aka_name,
         "manufacturer": manufacturer,
-        "height": height,
     }
 
 
