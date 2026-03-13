@@ -1,4 +1,5 @@
 # Standard library
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 # Third-party libraries
@@ -10,6 +11,32 @@ from .google_images import get_first_google_image
 
 
 WIKI_API = "https://gundam.fandom.com/api.php"
+
+
+def parse_title_model_and_name(title):
+    """
+    Parse a Gundam Wiki page title into:
+    - official model number
+    - mobile suit name (AKA)
+
+    Expected formats:
+      "OZ-00MS2B Tallgeese III"
+      "RX-78-2 Gundam"
+      "MS-06S Zaku II"
+    """
+
+    # Remove any parenthetical disambiguation like "(Mobile Suit)"
+    clean = re.sub(r"\s*\(.*?\)\s*", "", title).strip()
+
+    # Split on first space: model number is always the first token
+    parts = clean.split(" ", 1)
+
+    if len(parts) == 1:
+        # No model number found, fallback
+        return None, clean
+
+    model, name = parts[0], parts[1]
+    return model, name
 
 
 def parse_infobox(title):
@@ -34,7 +61,6 @@ def parse_infobox(title):
         manufacturer = None
         height = None
 
-        # Lighter selector: only .pi-data rows
         for row in soup.select(".pi-data"):
             label = row.find(class_="pi-data-label")
             value = row.find(class_="pi-data-value")
@@ -45,10 +71,18 @@ def parse_infobox(title):
             key = label.get_text(strip=True).lower()
             val = value.get_text(" ", strip=True)
 
-            if "model" in key:
-                model_number = val
+            # Remove reference markers like [1]
+            val = " ".join(part for part in val.split()
+                           if not part.startswith("["))
+
+            # Match model number variants
+            if any(k in key for k in ["model", "designation", "official"]):
+                if model_number is None:
+                    model_number = val
+
             elif "manufacturer" in key:
                 manufacturer = val
+
             elif "height" in key:
                 height = val
 
@@ -60,25 +94,26 @@ def parse_infobox(title):
 
 
 def process_page(page):
-    """Process a single wiki search result page."""
     title = page["title"]
     wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
 
-    # No wiki image scraping
-    image_url = None
+    # Parse model + name from title
+    official_model, aka_name = parse_title_model_and_name(title)
 
-    # Infobox fields
+    # Infobox fields (optional fallback)
     model_number, manufacturer, height = parse_infobox(title)
 
-    # SerpAPI image (cached + fallback)
     google_image = get_first_google_image(title + " gundam")
 
     return {
         "title": title,
         "wiki_url": wiki_url,
-        "image_url": image_url,
+        "image_url": None,
         "google_image": google_image,
-        "model_number": model_number,
+        # fallback to title if model number not found in infobox
+        "model_number": model_number or official_model,
+        "official_model": official_model,
+        "aka_name": aka_name,
         "manufacturer": manufacturer,
         "height": height,
     }
