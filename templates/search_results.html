@@ -20,7 +20,7 @@
         <ul>
         {% for suit in results.mobile_suits %}
             <li>
-                <h3>{{ suit.aka_name }}</h3>
+                <h3><a href="{{ suit.wiki_url }}" target="_blank">{{ suit.aka_name }}</a></h3>
 
                 {% if suit.google_image %}
                     <img src="{{ suit.google_image }}"
@@ -51,7 +51,6 @@
                     <li>{{ kit }}</li>
                 {% endfor %}
             </ul>
-            <p><a href="{{ suit.wiki_url }}" target="_blank">View Wiki</a></p>
         {% endfor %}
         </ul>
     {% endif %}
