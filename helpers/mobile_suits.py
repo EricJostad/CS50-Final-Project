@@ -1,6 +1,7 @@
 # Standard library
 import re
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache   # <-- added
 
 # Third-party libraries
 from bs4 import BeautifulSoup
@@ -72,6 +73,42 @@ def extract_appearances_from_html(soup):
     return categories
 
 
+#  Cache wiki link resolutions to avoid redundant API calls for the same title
+@lru_cache(maxsize=512)
+def get_wiki_link(title):
+    params = {
+        "action": "query",
+        "list": "search",
+        "srsearch": title,
+        "format": "json",
+        "origin": "*"
+    }
+
+    resp = cached_get(WIKI_API, params=params).json()
+    results = resp.get("query", {}).get("search", [])
+
+    if not results:
+        return None
+
+    best = results[0]["title"]
+    return f"https://gundam.fandom.com/wiki/{best.replace(' ', '_')}"
+
+
+def link_appearances(appearances):
+    links = {}
+
+    for category, items in appearances.items():
+        linked_items = []
+        for item in items:
+            linked_items.append({
+                "title": item,
+                "wiki_url": get_wiki_link(item)
+            })
+        links[category] = linked_items
+
+    return links
+
+
 def parse_infobox(title):
     """Extract model number, manufacturer, unit type, appearances, and gunpla kits."""
     params = {
@@ -90,7 +127,10 @@ def parse_infobox(title):
         html = parsed.get("parse", {}).get("text", {}).get("*", "")
         soup = BeautifulSoup(html, "html.parser")
 
-        appearances = extract_appearances_from_html(soup)
+        appearances_raw = extract_appearances_from_html(soup)
+
+        # Enrich appearances with wiki links where possible
+        appearances = link_appearances(appearances_raw)
 
         model_number = None
         manufacturer = None
