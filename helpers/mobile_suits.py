@@ -39,8 +39,41 @@ def parse_title_model_and_name(title):
     return model, name
 
 
+def extract_appearances_from_html(soup):
+    """
+    Scan the entire page HTML for appearance categories like:
+    Television, OVA, Movie, Manga, Game, etc.
+    Returns a dict: { "Television": [...], "OVA": [...], ... }
+    """
+
+    categories = {
+        "Television": [],
+        "OVA": [],
+        "Movie": [],
+        "Manga": [],
+        "Novel": [],
+        "Game": [],
+        "Video Game": [],
+    }
+
+    # Look for section headers (h2, h3, etc.)
+    for header in soup.find_all(["h2", "h3"]):
+        title = header.get_text(" ", strip=True).lower()
+
+        for cat in categories:
+            if cat.lower() in title:
+                # Find the next <ul> after the header
+                ul = header.find_next("ul")
+                if ul:
+                    items = [li.get_text(" ", strip=True)
+                             for li in ul.find_all("li")]
+                    categories[cat] = items
+
+    return categories
+
+
 def parse_infobox(title):
-    """Extract model number, aka title, and manufacturer from wiki infobox."""
+    """Extract model number, manufacturer, unit type, appearances, and gunpla kits."""
     params = {
         "action": "parse",
         "page": title,
@@ -57,9 +90,14 @@ def parse_infobox(title):
         html = parsed.get("parse", {}).get("text", {}).get("*", "")
         soup = BeautifulSoup(html, "html.parser")
 
+        appearances = extract_appearances_from_html(soup)
+
         model_number = None
         manufacturer = None
+        unit_type = None
+        gunpla = []
 
+        # Infobox parsing
         for row in soup.select(".pi-data"):
             label = row.find(class_="pi-data-label")
             value = row.find(class_="pi-data-value")
@@ -68,13 +106,13 @@ def parse_infobox(title):
                 continue
 
             key = label.get_text(strip=True).lower()
-            val = value.get_text(" ", strip=True)
+            # normalize whitespace
+            key = " ".join(key.split())
 
-            # Remove reference markers like [1]
+            val = value.get_text(" ", strip=True)
             val = " ".join(part for part in val.split()
                            if not part.startswith("["))
 
-            # Match model number variants
             if any(k in key for k in ["model", "designation", "official"]):
                 if model_number is None:
                     model_number = val
@@ -82,11 +120,25 @@ def parse_infobox(title):
             elif "manufacturer" in key:
                 manufacturer = val
 
-        return model_number, manufacturer
+            elif any(k in key for k in [
+                "unit type", "type", "classification", "role",
+                "mobile suit type", "ms type"
+            ]):
+                unit_type = val
+
+        # Gunpla section parsing
+        gunpla_header = soup.find(id="Gunpla")
+        if gunpla_header:
+            ul = gunpla_header.find_next("ul")
+            if ul:
+                gunpla = [li.get_text(" ", strip=True)
+                          for li in ul.find_all("li")]
+
+        return model_number, manufacturer, unit_type, appearances, gunpla
 
     except Exception as e:
         print("Wiki parse error:", e)
-        return None, None
+        return None, None, None, {}, []
 
 
 def process_page(page):
@@ -97,15 +149,18 @@ def process_page(page):
     official_model, aka_name = parse_title_model_and_name(title)
 
     # Infobox fields (optional fallback)
-    model_number, manufacturer = parse_infobox(title)
+    model_number, manufacturer, unit_type, appearances, gunpla = parse_infobox(
+        title)
 
     google_image = get_first_google_image(title + " gundam")
 
     return {
         "title": title,
+        "unit_type": unit_type,
+        "appearances": appearances,
+        "gunpla": gunpla,
         "wiki_url": wiki_url,
         "google_image": google_image,
-        # fallback to title if model number not found in infobox
         "model_number": model_number or official_model,
         "official_model": official_model,
         "aka_name": aka_name,

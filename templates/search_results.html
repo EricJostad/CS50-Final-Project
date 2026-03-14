@@ -30,9 +30,28 @@
 
                 <p><strong>Model Number:</strong> {{ suit.model_number or "Unknown" }}</p>
                 <p><strong>Manufacturer:</strong> {{ suit.manufacturer or "Unknown" }}</p>
-
-                <p><a href="{{ suit.wiki_url }}" target="_blank">View Wiki</a></p>
             </li>
+        <h2>Appearances</h2>
+
+        {% for category, shows in suit.appearances.items() %}
+            {% if shows %}
+                <p><strong>{{ category }}:</strong></p>
+                <ul>
+                    {% for show in shows %}
+                        <li>{{ show }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+
+
+       <h2>Gunpla Kits</h2>
+            <ul>
+                {% for kit in suit.gunpla %}
+                    <li>{{ kit }}</li>
+                {% endfor %}
+            </ul>
+            <p><a href="{{ suit.wiki_url }}" target="_blank">View Wiki</a></p>
         {% endfor %}
         </ul>
     {% endif %}
