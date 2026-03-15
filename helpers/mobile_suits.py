@@ -110,7 +110,7 @@ def link_appearances(appearances):
 
 
 def parse_infobox(title):
-    """Extract model number, manufacturer, unit type, appearances, and gunpla kits."""
+    """Extract model number, manufacturer, unit type and appearances."""
     params = {
         "action": "parse",
         "page": title,
@@ -168,6 +168,7 @@ def parse_infobox(title):
 
         # Gunpla section parsing
         gunpla_header = soup.find(id="Gunpla")
+
         if gunpla_header:
             ul = gunpla_header.find_next("ul")
             if ul:
