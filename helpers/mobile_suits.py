@@ -43,7 +43,7 @@ def parse_title_model_and_name(title):
 def extract_appearances_from_html(soup):
     """
     Scan the entire page HTML for appearance categories like:
-    Television, OVA, Movie, Manga, Game, etc.
+    Television, OVA, Movie, Game, etc.
     Returns a dict: { "Television": [...], "OVA": [...], ... }
     """
 
@@ -51,7 +51,6 @@ def extract_appearances_from_html(soup):
         "Television": [],
         "OVA": [],
         "Movie": [],
-        "Manga": [],
         "Novel": [],
         "Game": [],
         "Video Game": [],
@@ -102,7 +101,15 @@ def clean_series_name(raw):
     mapping = {
         "MSG": "Mobile Suit Gundam",
         "MFG": "Mobile Fighter G Gundam",
+        "MSGW": "Mobile Suit Gundam Wing",
+        "Wing": "Mobile Suit Gundam Wing",
+        "EW": "Endless Waltz",
         "GBF": "Gundam Build Fighters",
+        "GBFT": "Gundam Build Fighters Try",
+        "GBD": "Gundam Build Divers",
+        "BD": "Gundam Build Divers",
+        "GBA": "Gundam Build Advance",
+        "GBD Battlogue": "Gundam Build Divers Battlogue",
         "Z": "Mobile Suit Zeta Gundam",
         "ZZ": "Mobile Suit Gundam ZZ",
     }
