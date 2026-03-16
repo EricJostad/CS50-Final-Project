@@ -87,8 +87,8 @@ def get_series(name):
     response = cached_get(WIKI_API, params=params)
     pages = response.json().get("query", {}).get("search", [])
 
-    # Limit to top 3
-    pages = pages[:3]
+    # Limit to top result
+    pages = pages[:1]
 
     # Parallelize processing of each page
     with ThreadPoolExecutor(max_workers=3) as executor:
