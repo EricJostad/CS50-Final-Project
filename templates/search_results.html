@@ -61,7 +61,7 @@
         <ul>
         {% for series in results.series %}
             <li>
-                <h3>{{ series.title }}</h3>
+                <h3><a href="{{ series.wiki_url }}" target="_blank">{{ series.title }}</a></h3>
 
                 {% if series.google_image %}
                     <img src="{{ series.google_image }}"
@@ -72,7 +72,6 @@
                 <p><strong>Aired:</strong> {{ series.aired or "Unknown" }}</p>
                 <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
 
-                <p><a href="{{ series.wiki_url }}" target="_blank">View Wiki</a></p>
             </li>
         {% endfor %}
         </ul>
