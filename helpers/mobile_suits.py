@@ -94,15 +94,32 @@ def get_wiki_link(title):
     return f"https://gundam.fandom.com/wiki/{best.replace(' ', '_')}"
 
 
+def clean_series_name(raw):
+    # Take only the string before the colon
+    base = raw.split(":")[0].strip()
+
+    # Expand common abbreviations
+    mapping = {
+        "MSG": "Mobile Suit Gundam",
+        "MFG": "Mobile Fighter G Gundam",
+        "GBF": "Gundam Build Fighters",
+        "Z": "Mobile Suit Zeta Gundam",
+        "ZZ": "Mobile Suit Gundam ZZ",
+    }
+
+    return mapping.get(base, base)
+
+
 def link_appearances(appearances):
     links = {}
 
     for category, items in appearances.items():
         linked_items = []
         for item in items:
+            cleaned = clean_series_name(item)
             linked_items.append({
                 "title": item,
-                "wiki_url": get_wiki_link(item)
+                "wiki_url": get_wiki_link(cleaned)
             })
         links[category] = linked_items
 
