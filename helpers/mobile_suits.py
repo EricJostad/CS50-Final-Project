@@ -135,7 +135,6 @@ def parse_infobox(title):
         model_number = None
         manufacturer = None
         unit_type = None
-        gunpla = []
 
         # Infobox parsing
         for row in soup.select(".pi-data"):
@@ -166,16 +165,7 @@ def parse_infobox(title):
             ]):
                 unit_type = val
 
-        # Gunpla section parsing
-        gunpla_header = soup.find(id="Gunpla")
-
-        if gunpla_header:
-            ul = gunpla_header.find_next("ul")
-            if ul:
-                gunpla = [li.get_text(" ", strip=True)
-                          for li in ul.find_all("li")]
-
-        return model_number, manufacturer, unit_type, appearances, gunpla
+        return model_number, manufacturer, unit_type, appearances
 
     except Exception as e:
         print("Wiki parse error:", e)
@@ -190,7 +180,7 @@ def process_page(page):
     official_model, aka_name = parse_title_model_and_name(title)
 
     # Infobox fields (optional fallback)
-    model_number, manufacturer, unit_type, appearances, gunpla = parse_infobox(
+    model_number, manufacturer, unit_type, appearances = parse_infobox(
         title)
 
     google_image = get_first_google_image(title + " gundam")
@@ -199,7 +189,6 @@ def process_page(page):
         "title": title,
         "unit_type": unit_type,
         "appearances": appearances,
-        "gunpla": gunpla,
         "wiki_url": wiki_url,
         "google_image": google_image,
         "model_number": model_number or official_model,
