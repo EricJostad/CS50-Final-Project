@@ -7,9 +7,8 @@
 
 {% set has_ms = results.mobile_suits is defined and results.mobile_suits %}
 {% set has_series = results.series is defined and results.series %}
-{% set has_kits = results.model_kits is defined and results.model_kits %}
 
-{% if not has_ms and not has_series and not has_kits %}
+{% if not has_ms and not has_series %}
     <p>No results found.</p>
 
 {% else %}
@@ -68,7 +67,7 @@
                          alt="{{ series.title }}"
                          style="max-width: 200px; margin-bottom: 10px;">
                 {% endif %}
-                
+
                 <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
 
             </li>

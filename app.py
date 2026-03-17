@@ -122,9 +122,13 @@ def search():
     results = {}
 
     if category == "mobile_suit":
+        # Direct mobile suit search
         results["mobile_suits"] = get_mobile_suit(query)
+
     else:
-        results["series"] = get_series(query)
+        # Series search
+        series_list = get_series(query)
+        results["series"] = series_list
 
     return render_template("search_results.html", results=results, query=query)
 

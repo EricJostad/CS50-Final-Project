@@ -64,7 +64,7 @@ def process_page(page):
         "title": title,
         "wiki_url": wiki_url,
         "google_image": google_image,
-        "episodes": episodes
+        "episodes": episodes,
     }
 
 
