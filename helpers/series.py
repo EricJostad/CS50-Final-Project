@@ -30,7 +30,6 @@ def parse_infobox(title):
         html = parsed.get("parse", {}).get("text", {}).get("*", "")
         soup = BeautifulSoup(html, "html.parser")
 
-        aired = None
         episodes = None
 
         # Lighter selector: only .pi-data rows
@@ -44,12 +43,10 @@ def parse_infobox(title):
             key = label.get_text(strip=True).lower()
             val = value.get_text(" ", strip=True)
 
-            if "aired" in key:
-                aired = val
-            elif "episodes" in key:
+            if "episodes" in key:
                 episodes = val
 
-        return aired, episodes
+        return episodes
 
     except Exception as e:
         print("Wiki parse error:", e)
@@ -60,15 +57,14 @@ def process_page(page):
     title = page["title"]
     wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
 
-    aired, episodes = parse_infobox(title)
+    episodes = parse_infobox(title)
     google_image = get_first_google_image(title + " gundam anime")
 
     return {
         "title": title,
         "wiki_url": wiki_url,
         "google_image": google_image,
-        "aired": aired,
-        "episodes": episodes,
+        "episodes": episodes
     }
 
 
