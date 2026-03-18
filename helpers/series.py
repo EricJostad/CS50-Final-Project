@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from bs4 import BeautifulSoup
 
 # Local application imports
-from .utils import cached_get
+from .utils import cached_get, fix_relative_links
 from .google_images import get_first_google_image
 
 
@@ -47,6 +47,9 @@ def parse_infobox(title):
 
         # Extract Synopsis section
         synopsis = extract_section_text(soup, "Synopsis")
+
+        # Convert relative links to full Fandom URLs
+        synopsis = fix_relative_links(synopsis)
 
         return episodes, synopsis
 
