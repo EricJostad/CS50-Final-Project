@@ -7,7 +7,7 @@ from functools import lru_cache   # <-- added
 from bs4 import BeautifulSoup
 
 # Local application imports
-from .utils import cached_get
+from .utils import cached_get, fix_relative_links
 from .google_images import get_first_google_image
 
 
