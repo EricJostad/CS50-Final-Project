@@ -31,10 +31,10 @@
                 <p><strong>Manufacturer:</strong> {{ suit.manufacturer or "Unknown" }}</p>
 
                 <h4>Technology & Combat Characteristics</h4>
-                <p>{{ suit.tech_combat or "No technical data available." }}</p>
+                <div>{{ suit.tech_combat | safe if suit.tech_combat else "No technical data available." }}</div>
 
                 <h4>History</h4>
-                <p>{{ suit.history or "No history available." }}</p>
+                <div>{{ suit.history | safe if suit.history else "No history available." }}</div>
 
                 <h4>Animated Appearances</h4>
                 {% for category, shows in suit.appearances.items() %}
@@ -75,7 +75,7 @@
                 {% endif %}
 
                 <h4>Synopsis</h4>
-                <p>{{ series.synopsis or "No synopsis available." }}</p>
+                <div>{{ series.synopsis | safe if series.synopsis else "No synopsis available." }}</div>
 
                 <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
 

@@ -18,7 +18,6 @@ def parse_infobox(title):
         "action": "parse",
         "page": title,
         "prop": "text",
-        "section": 0,
         "format": "json",
         "origin": "*"
     }
@@ -46,18 +45,64 @@ def parse_infobox(title):
             if "episodes" in key:
                 episodes = val
 
-        return episodes
+        # Extract Synopsis section
+        synopsis = extract_section_text(soup, "Synopsis")
+
+        return episodes, synopsis
 
     except Exception as e:
         print("Wiki parse error:", e)
         return None, None
 
 
+def extract_section_text(soup, header_title):
+    """
+    Extracts the HTML content of a section starting from a header
+    (h2/h3/etc.) until the next header of the same level.
+    Preserves paragraph and list formatting.
+    """
+    header = None
+
+    # Find the header that matches the requested title
+    for h in soup.find_all(["h2", "h3"]):
+        title = h.get_text(" ", strip=True).lower()
+        if header_title.lower() in title:
+            header = h
+            break
+
+    if not header:
+        return None
+
+    content = []
+    for sibling in header.find_next_siblings():
+        if sibling.name in ["h2", "h3"]:
+            break
+
+        # Preserve paragraphs and lists as HTML
+        if sibling.name in ["p", "ul", "ol"]:
+            content.append(str(sibling))
+            continue
+
+        # Handle wrapped content (div, figure, aside)
+        if sibling.name in ["div", "figure", "aside"]:
+            inner = sibling.find(["p", "ul", "ol"])
+            if inner:
+                content.append(str(inner))
+            continue
+
+        # Fallback: wrap plain text in <p>
+        text = sibling.get_text(" ", strip=True)
+        if text:
+            content.append(f"<p>{text}</p>")
+
+    return "\n".join(content).strip() or None
+
+
 def process_page(page):
     title = page["title"]
     wiki_url = f"https://gundam.fandom.com/wiki/{title.replace(' ', '_')}"
 
-    episodes = parse_infobox(title)
+    episodes, synopsis = parse_infobox(title)
     google_image = get_first_google_image(title + " gundam anime")
 
     return {
@@ -65,6 +110,7 @@ def process_page(page):
         "wiki_url": wiki_url,
         "google_image": google_image,
         "episodes": episodes,
+        "synopsis": synopsis,
     }
 
 
