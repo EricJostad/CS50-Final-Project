@@ -51,9 +51,6 @@ def extract_appearances_from_html(soup):
         "Television": [],
         "OVA": [],
         "Movie": [],
-        "Novel": [],
-        "Game": [],
-        "Video Game": [],
     }
 
     # Look for section headers (h2, h3, etc.)
@@ -70,6 +67,34 @@ def extract_appearances_from_html(soup):
                     categories[cat] = items
 
     return categories
+
+
+# Extract any section by header title
+def extract_section_text(soup, header_title):
+    """
+    Extracts the text content of a section starting from a header
+    (h2/h3/etc.) until the next header of the same level.
+    """
+    header = None
+
+    # Find the header that matches the requested title
+    for h in soup.find_all(["h2", "h3"]):
+        title = h.get_text(" ", strip=True).lower()
+        if header_title.lower() in title:
+            header = h
+            break
+
+    if not header:
+        return None
+
+    # Collect text until the next header
+    content = []
+    for sibling in header.find_next_siblings():
+        if sibling.name in ["h2", "h3"]:
+            break
+        content.append(sibling.get_text(" ", strip=True))
+
+    return " ".join(content).strip() or None
 
 
 #  Cache wiki link resolutions to avoid redundant API calls for the same title
@@ -139,7 +164,6 @@ def parse_infobox(title):
         "action": "parse",
         "page": title,
         "prop": "text",
-        "section": 0,
         "format": "json",
         "origin": "*"
     }
@@ -189,11 +213,18 @@ def parse_infobox(title):
             ]):
                 unit_type = val
 
-        return model_number, manufacturer, unit_type, appearances
+        # Extract Technology & Combat Characteristics
+        tech_combat = extract_section_text(
+            soup, "Technology & Combat Characteristics")
+
+        # Extract History section
+        history_section = extract_section_text(soup, "History")
+
+        return model_number, manufacturer, unit_type, appearances, tech_combat, history_section
 
     except Exception as e:
         print("Wiki parse error:", e)
-        return None, None, None, {}, []
+        return None, None, None, {}, None, None
 
 
 def process_page(page):
@@ -204,7 +235,7 @@ def process_page(page):
     official_model, aka_name = parse_title_model_and_name(title)
 
     # Infobox fields (optional fallback)
-    model_number, manufacturer, unit_type, appearances = parse_infobox(
+    model_number, manufacturer, unit_type, appearances, tech_combat, history_section = parse_infobox(
         title)
 
     google_image = get_first_google_image(title + " gundam")
@@ -219,6 +250,8 @@ def process_page(page):
         "official_model": official_model,
         "aka_name": aka_name,
         "manufacturer": manufacturer,
+        "tech_combat": tech_combat,
+        "history": history_section,
     }
 
 
