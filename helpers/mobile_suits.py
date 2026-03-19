@@ -229,16 +229,13 @@ def parse_infobox(title):
             ]):
                 unit_type = val
 
-        # Extract Technology & Combat Characteristics
-        tech_combat = extract_section_text(
-            soup, "Technology & Combat Characteristics")
+        # Extract Technology & Combat Characteristics as well as update formating
+        tech_combat = fix_relative_links(extract_section_text(
+            soup, "Technology & Combat Characteristics"))
 
-        tech_combat = fix_relative_links(tech_combat)
-
-        # Extract History section
-        history_section = extract_section_text(soup, "History")
-
-        history_section = fix_relative_links(history_section)
+        # Extract History section as well as update formating
+        history_section = fix_relative_links(
+            extract_section_text(soup, "History"))
 
         return model_number, manufacturer, unit_type, appearances, tech_combat, history_section
 

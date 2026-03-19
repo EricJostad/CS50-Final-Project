@@ -45,11 +45,8 @@ def parse_infobox(title):
             if "episodes" in key:
                 episodes = val
 
-        # Extract Synopsis section
-        synopsis = extract_section_text(soup, "Synopsis")
-
-        # Convert relative links to full Fandom URLs
-        synopsis = fix_relative_links(synopsis)
+        # Extract Synopsis section as well as update formating
+        synopsis = fix_relative_links(extract_section_text(soup, "Synopsis"))
 
         return episodes, synopsis
 
