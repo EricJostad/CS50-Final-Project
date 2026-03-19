@@ -1,7 +1,7 @@
 # Standard library
 import re
 from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache   # <-- added
+from functools import lru_cache
 
 # Third-party libraries
 from bs4 import BeautifulSoup
@@ -72,8 +72,9 @@ def extract_appearances_from_html(soup):
 # Extract any section by header title
 def extract_section_text(soup, header_title):
     """
-    Extracts the text content of a section starting from a header
+    Extracts the HTML content of a section starting from a header
     (h2/h3/etc.) until the next header of the same level.
+    Preserves paragraph and list formatting.
     """
     header = None
 
@@ -87,14 +88,29 @@ def extract_section_text(soup, header_title):
     if not header:
         return None
 
-    # Collect text until the next header
     content = []
     for sibling in header.find_next_siblings():
         if sibling.name in ["h2", "h3"]:
             break
-        content.append(sibling.get_text(" ", strip=True))
 
-    return " ".join(content).strip() or None
+        # Preserve paragraphs and lists as HTML
+        if sibling.name in ["p", "ul", "ol"]:
+            content.append(str(sibling))
+            continue
+
+        # Handle wrapped content (div, figure, aside)
+        if sibling.name in ["div", "figure", "aside"]:
+            inner = sibling.find(["p", "ul", "ol"])
+            if inner:
+                content.append(str(inner))
+            continue
+
+        # Fallback: wrap plain text in <p>
+        text = sibling.get_text(" ", strip=True)
+        if text:
+            content.append(f"<p>{text}</p>")
+
+    return "\n".join(content).strip() or None
 
 
 #  Cache wiki link resolutions to avoid redundant API calls for the same title
@@ -193,7 +209,7 @@ def parse_infobox(title):
                 continue
 
             key = label.get_text(strip=True).lower()
-            # normalize whitespace
+            # Normalize whitespace
             key = " ".join(key.split())
 
             val = value.get_text(" ", strip=True)
@@ -217,8 +233,12 @@ def parse_infobox(title):
         tech_combat = extract_section_text(
             soup, "Technology & Combat Characteristics")
 
+        tech_combat = fix_relative_links(tech_combat)
+
         # Extract History section
         history_section = extract_section_text(soup, "History")
+
+        history_section = fix_relative_links(history_section)
 
         return model_number, manufacturer, unit_type, appearances, tech_combat, history_section
 
