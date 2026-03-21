@@ -47,12 +47,12 @@ def login():
         password = request.form.get("password")
 
         if not username or not password:
-            return render_template("login.html", error="Must provide username and password")
+            return apology("Must provide username and password")
 
         user = User.query.filter_by(username=username).first()
 
         if not user or not check_password_hash(user.password, password):
-            return render_template("login.html", error="Invalid username or password")
+            return apology("Invalid username or password")
 
         session["user_id"] = user.id
         return redirect("/")
