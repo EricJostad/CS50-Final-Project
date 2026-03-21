@@ -11,6 +11,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from helpers.mobile_suits import get_mobile_suit
 from helpers.series import get_series
 from helpers.auth import login_required
+from helpers.utils import apology
 from models import User, db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -76,14 +77,14 @@ def register():
         confirmation = request.form.get("confirmation")
 
         if not username or not password or not confirmation:
-            return render_template("register.html", error="Must provide username and password")
+            return apology("Must provide username and password", 400)
 
-        if password != confirmation:
-            return render_template("register.html", error="Passwords do not match")
+        elif password != confirmation:
+            return apology("Passwords do not match", 400)
 
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
-            return render_template("register.html", error="Username already taken")
+            return apology("Username already taken", 400)
 
         hashed_password = generate_password_hash(password)
         new_user = User(username=username, password=hashed_password)
