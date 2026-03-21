@@ -1,5 +1,6 @@
 # Third-party libraries
 import requests
+from flask import render_template
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -25,3 +26,9 @@ def fix_relative_links(html):
     if not html:
         return html
     return html.replace('href="/wiki/', 'href="https://gundam.fandom.com/wiki/')
+
+
+def apology(message, code=400):
+    """Render message as an apology to user."""
+
+    return render_template("apology.html", top=code, bottom=message), code

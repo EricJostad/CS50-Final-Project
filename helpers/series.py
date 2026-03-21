@@ -45,7 +45,7 @@ def parse_infobox(title):
             if "episodes" in key:
                 episodes = val
 
-        # Extract Synopsis section as well as update formating
+        # Extract Synopsis section as well as updated formatting
         synopsis = fix_relative_links(extract_section_text(soup, "Synopsis"))
 
         return episodes, synopsis
