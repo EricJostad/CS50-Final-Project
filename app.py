@@ -12,6 +12,7 @@ from helpers.mobile_suits import get_mobile_suit
 from helpers.series import get_series
 from helpers.auth import login_required
 from helpers.utils import apology
+from helpers.auth import load_user
 from models import User, db
 
 app = Flask(__name__, instance_relative_config=True)
@@ -31,7 +32,13 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 
+@app.before_request
+def before_request():
+    load_user()
+
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
@@ -54,10 +61,13 @@ def login():
         if not user or not check_password_hash(user.password, password):
             return apology("Invalid username or password")
 
+        # Remember which user has logged in
         session["user_id"] = user.id
-        return redirect("/")
 
-    return render_template("login.html")
+        # Redirect user to homer page
+        return redirect("/")
+    else:
+        return render_template("login.html")
 
 
 @app.route("/logout")
