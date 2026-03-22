@@ -64,7 +64,7 @@ def login():
         # Remember which user has logged in
         session["user_id"] = user.id
 
-        # Redirect user to homer page
+        # Redirect user to home page
         return redirect("/")
     else:
         return render_template("login.html")
