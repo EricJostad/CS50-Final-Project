@@ -39,7 +39,14 @@ def before_request():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+
+    user_id = session.get("user_id")
+
+    user = None
+    if user_id:
+        user = User.query.filter_by(id=user_id).first()
+
+    return render_template("index.html", user=user)
 
 
 @app.route("/login", methods=["GET", "POST"])
