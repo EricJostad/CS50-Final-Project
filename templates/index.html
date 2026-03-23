@@ -7,11 +7,11 @@
     <h1>Hello {{ user.username }}. Welcome to GundamDB!</h1>
     {% else %}
     <h1>Welcome to GundamDB!</h1>
+    {% endif %}
     <p>Explore our extensive database of Gundam models, specifications, and more.</p>
     <form action="/search" method="get" class="d-flex mb-4">
         <input class="form-control me-2" name="query" placeholder="Search for a mobile suit..." type="search" required>
         <button class="btn btn-outline-success" type="submit">Search</button>
     </form>
-    {% endif %}
 {% endblock %}
             
