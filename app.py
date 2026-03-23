@@ -158,5 +158,47 @@ def settings():
     return render_template("settings.html")
 
 
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    """Allow user to change password"""
+
+    # Query user data for easy access in function
+    user_id = session.get("user_id")
+    user = User.query.filter_by(id=user_id).first()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        old_pw = request.form.get("old password")
+        new_pw = request.form.get("new password")
+        confirm_pw = request.form.get("confirm password")
+
+        # Help to validate the the request is coming from the correct user
+        if not old_pw:
+            return apology("must provide your current password")
+        elif not check_password_hash(user.password, old_pw):
+            return apology("invalid password")
+
+        else:
+            # If so, check that the password does not match their current password
+            if old_pw == new_pw:
+                return apology("cannot use previous password as new password")
+            # Ensure that the new password meets the minimum requirement
+            elif len(new_pw) < 6:
+                return apology("password must be at least 6 characters")
+            # Ensure that the user is providing the correct new password
+            elif new_pw != confirm_pw:
+                return apology("passwords must match")
+
+        user.password = generate_password_hash(new_pw)
+        db.session.commit()
+
+        # Redirect user to home page
+        return redirect("/")
+
+    return render_template("change-password.html")
+
+
 with app.app_context():
     db.create_all()
