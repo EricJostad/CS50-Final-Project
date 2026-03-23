@@ -150,5 +150,13 @@ def search():
     return render_template("search_results.html", results=results, query=query)
 
 
+@app.route("/settings")
+@login_required
+def settings():
+    """Allow user to change their settings"""
+
+    return render_template("settings.html")
+
+
 with app.app_context():
     db.create_all()
