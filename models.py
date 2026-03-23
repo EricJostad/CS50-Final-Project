@@ -14,3 +14,4 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
                            default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
