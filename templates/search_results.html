@@ -1,10 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}
-
-Search Results
-
-{% endblock %}
+{% block title %}Search Results{% endblock %}
 
 {% block content %}
 <h1>Search Result for "{{ query }}"</h1>
@@ -58,6 +54,7 @@ Search Results
                     {% endif %}
                 {% endfor %}
             </li>
+            <button class="btn btn-primary" type="submit">Add to Build List</button>
         {% endfor %}
         </ul>
     {% endif %}
@@ -85,6 +82,7 @@ Search Results
 
             </li>
         {% endfor %}
+        <button class="btn btn-primary" type="submit">Add to Watch List</button>
         </ul>
     {% endif %}
 
