@@ -67,6 +67,9 @@ def login():
         if not user or not check_password_hash(user.password, password):
             return apology("Invalid username or password")
 
+        elif not user.is_active:
+            return apology("account has been deactivated", 403)
+
         # Remember which user has logged in
         session["user_id"] = user.id
 
