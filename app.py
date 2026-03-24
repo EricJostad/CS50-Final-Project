@@ -200,5 +200,33 @@ def change_password():
     return render_template("change-password.html")
 
 
+@app.route("/deactivate-account", methods=["GET", "POST"])
+@login_required
+def deactivate_account():
+    """Allow user to permanantly deactivate their account"""
+
+    # Pulling userdata for easy access in function
+    user_id = session.get("user_id")
+    user = User.query.filter_by(id=user_id).first()
+
+    user_pw = request.form.get("password")
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Help to validate the the request is coming from the correct user
+        if not user_pw:
+            return apology("must provide password")
+        elif check_password_hash(user.password, user_pw):
+            return apology("invalid password")
+
+        # Move user to confirm deactivation
+        else:
+            return render_template("/confirm-deactivate.html")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("deactivate-account.html")
+
+
 with app.app_context():
     db.create_all()
