@@ -153,6 +153,18 @@ def search():
     return render_template("search_results.html", results=results, query=query)
 
 
+@app.route("/build-list")
+@login_required
+def build_list():
+    return render_template("build-list.html")
+
+
+@app.route("/watch-list")
+@login_required
+def watch_list():
+    return render_template("watch-list.html")
+
+
 @app.route("/settings")
 @login_required
 def settings():
