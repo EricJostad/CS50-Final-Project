@@ -153,16 +153,16 @@ def search():
     return render_template("search_results.html", results=results, query=query)
 
 
-@app.route("/build-list")
+@app.route("/build_list")
 @login_required
 def build_list():
-    return render_template("build-list.html")
+    return render_template("build_list.html")
 
 
-@app.route("/watch-list")
+@app.route("/watch_list")
 @login_required
 def watch_list():
-    return render_template("watch-list.html")
+    return render_template("watch_list.html")
 
 
 @app.route("/settings")
@@ -173,7 +173,7 @@ def settings():
     return render_template("settings.html")
 
 
-@app.route("/change-password", methods=["GET", "POST"])
+@app.route("/change_password", methods=["GET", "POST"])
 @login_required
 def change_password():
     """Allow user to change password"""
@@ -212,10 +212,10 @@ def change_password():
         # Redirect user to home page
         return redirect("/")
 
-    return render_template("change-password.html")
+    return render_template("change_password.html")
 
 
-@app.route("/deactivate-account", methods=["GET", "POST"])
+@app.route("/deactivate_account", methods=["GET", "POST"])
 @login_required
 def deactivate_account():
     """Allow user to permanantly deactivate their account"""
@@ -236,11 +236,11 @@ def deactivate_account():
 
         # Move user to confirm deactivation
         else:
-            return render_template("/confirm-deactivate.html")
+            return render_template("/confirm_deactivate.html")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("deactivate-account.html")
+        return render_template("deactivate_account.html")
 
 
 @app.route("/confirm_deactivate", methods=["GET", "POST"])
