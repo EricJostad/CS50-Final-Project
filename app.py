@@ -209,14 +209,14 @@ def deactivate_account():
     user_id = session.get("user_id")
     user = User.query.filter_by(id=user_id).first()
 
-    user_pw = request.form.get("password")
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+        user_pw = request.form.get("password")
+
         # Help to validate the the request is coming from the correct user
         if not user_pw:
             return apology("must provide password")
-        elif check_password_hash(user.password, user_pw):
+        elif not check_password_hash(user.password, user_pw):
             return apology("invalid password")
 
         # Move user to confirm deactivation
@@ -226,6 +226,39 @@ def deactivate_account():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("deactivate-account.html")
+
+
+@app.route("/confirm_deactivate", methods=["GET", "POST"])
+@login_required
+def confirm_deactivate():
+    """Allow user to confirm that they would like to deactivate their account"""
+
+    # Pulling userdata for easy access in function
+    user_id = session.get("user_id")
+    user = User.query.filter_by(id=user_id).first()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        user_pw = request.form.get("password")
+
+        # Help to validate the the request is coming from the correct user
+        if not user_pw:
+            return apology("must provide password")
+        elif not check_password_hash(user.password, user_pw):
+            return apology("invalid password")
+        # Deactivate user account, but does not delete user data from database for the purposes of record keeping
+        else:
+
+            user.is_active = False
+            db.session.commit()
+
+            # Forget any user_id
+            session.clear()
+
+            # Redirect user to login form
+            return redirect("/login")
+    else:
+        return render_template("confirm_deactivate.html", user=user)
 
 
 with app.app_context():
