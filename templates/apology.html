@@ -7,4 +7,8 @@
 {% block content %}
     <p>{{ top }}</p>
     <p>{{ bottom }}</p>
+
+    {% if not session["user_id"] %}
+    <a href="/login">Back to Login</a>
+    {% endif %}
 {% endblock %}
