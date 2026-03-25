@@ -153,6 +153,11 @@ def search():
     return render_template("search_results.html", results=results, query=query)
 
 
+@app.route("/rankings")
+def rankings():
+    return render_template("rankings.html")
+
+
 @app.route("/build_list")
 @login_required
 def build_list():
