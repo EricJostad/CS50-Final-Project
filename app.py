@@ -158,17 +158,18 @@ def rankings():
     return render_template("rankings.html")
 
 
-@app.route("/build_list")
+@app.route("/build_list", methods=["GET", "POST"])
 @login_required
 def build_list():
     return render_template("build_list.html")
 
 
-@app.route("/watch_list")
+@app.route("/watch_list", methods=["GET", "POST"])
 @login_required
 def watch_list():
     user_id = session.get("user_id")
     user = User.query.filter_by(id=user_id).first()
+
     return render_template("watch_list.html", user=user)
 
 
