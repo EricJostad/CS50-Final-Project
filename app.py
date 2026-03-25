@@ -238,7 +238,7 @@ def deactivate_account():
 
         # Move user to confirm deactivation
         else:
-            return render_template("/confirm_deactivate.html")
+            return render_template("confirm_deactivate.html")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
