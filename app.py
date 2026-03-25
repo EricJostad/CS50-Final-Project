@@ -162,7 +162,9 @@ def build_list():
 @app.route("/watch_list")
 @login_required
 def watch_list():
-    return render_template("watch_list.html")
+    user_id = session.get("user_id")
+    user = User.query.filter_by(id=user_id).first()
+    return render_template("watch_list.html", user=user)
 
 
 @app.route("/settings")

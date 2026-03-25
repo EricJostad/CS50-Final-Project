@@ -5,7 +5,17 @@
 {% endblock %}
 
 {% block content %}
-    <div>
-        <h2>Under construction...</h2>
-    </div>
+<main class="container py-5 text-center">
+    <h3>{{ username }}'s watch list:' </h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Series</th>
+                <th class="text-end">Watched?</th>
+                <th class="text-end">Rating</th>
+                <th class="text-end">Thoughts</th>
+            </tr>
+        </thead>
+    </table>
+</main>
 {% endblock %}
