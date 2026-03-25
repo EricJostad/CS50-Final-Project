@@ -15,75 +15,79 @@
 
     {# ---------------------- Mobile Suits ---------------------- #}
     {% if has_ms %}
-        <h2>Mobile Suits</h2>
-        <ul>
-        {% for suit in results.mobile_suits %}
-            <li>
-                <h3><a href="{{ suit.wiki_url }}" target="_blank">{{ suit.aka_name }}</a></h3>
+        <form action="/build_list" method="post">
+            <h2>Mobile Suits</h2>
+            <ul>
+            {% for suit in results.mobile_suits %}
+                <li>
+                    <h3><a href="{{ suit.wiki_url }}" target="_blank">{{ suit.aka_name }}</a></h3>
 
-                {% if suit.google_image %}
-                    <img src="{{ suit.google_image }}"
-                        alt="{{ suit.title }}"
-                        style="max-width: 200px; margin-bottom: 10px;">
-                {% endif %}
-
-                <p><strong>Model Number:</strong> {{ suit.model_number or "Unknown" }}</p>
-                <p><strong>Manufacturer:</strong> {{ suit.manufacturer or "Unknown" }}</p>
-
-                <h4>Technology & Combat Characteristics</h4>
-                <div>{{ suit.tech_combat | safe if suit.tech_combat else "No technical data available." }}</div>
-
-                <h4>History</h4>
-                <div>{{ suit.history | safe if suit.history else "No history available." }}</div>
-
-                <h4>Animated Appearances</h4>
-                {% for category, shows in suit.appearances.items() %}
-                    {% if shows %}
-                        <p><strong>{{ category }}:</strong></p>
-                        <ul>
-                            {% for show in shows %}
-                                <li>
-                                    {% if show.wiki_url %}
-                                        <a href="{{ show.wiki_url }}" target="_blank">{{ show.title }}</a>
-                                    {% else %}
-                                        {{ show.title }}
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
+                    {% if suit.google_image %}
+                        <img src="{{ suit.google_image }}"
+                            alt="{{ suit.title }}"
+                            style="max-width: 200px; margin-bottom: 10px;">
                     {% endif %}
-                {% endfor %}
-            </li>
-            <button class="btn btn-primary" type="submit">Add to Build List</button>
-        {% endfor %}
-        </ul>
+
+                    <p><strong>Model Number:</strong> {{ suit.model_number or "Unknown" }}</p>
+                    <p><strong>Manufacturer:</strong> {{ suit.manufacturer or "Unknown" }}</p>
+
+                    <h4>Technology & Combat Characteristics</h4>
+                    <div>{{ suit.tech_combat | safe if suit.tech_combat else "No technical data available." }}</div>
+
+                    <h4>History</h4>
+                    <div>{{ suit.history | safe if suit.history else "No history available." }}</div>
+
+                    <h4>Animated Appearances</h4>
+                    {% for category, shows in suit.appearances.items() %}
+                        {% if shows %}
+                            <p><strong>{{ category }}:</strong></p>
+                            <ul>
+                                {% for show in shows %}
+                                    <li>
+                                        {% if show.wiki_url %}
+                                            <a href="{{ show.wiki_url }}" target="_blank">{{ show.title }}</a>
+                                        {% else %}
+                                            {{ show.title }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endfor %}
+                </li>
+                <button class="btn btn-primary" type="submit">Add to Build List</button>
+            {% endfor %}
+            </ul>
+        </form>
     {% endif %}
 
 
 
     {# ---------------------- Series ---------------------- #}
     {% if has_series %}
-        <h2>Series</h2>
-        <ul>
-        {% for series in results.series %}
-            <li>
-                <h3><a href="{{ series.wiki_url }}" target="_blank">{{ series.title }}</a></h3>
+        <form action="/watch_list" method="post">
+            <h2>Series</h2>
+            <ul>
+            {% for series in results.series %}
+                <li>
+                    <h3><a href="{{ series.wiki_url }}" target="_blank">{{ series.title }}</a></h3>
 
-                {% if series.google_image %}
-                    <img src="{{ series.google_image }}"
-                         alt="{{ series.title }}"
-                         style="max-width: 200px; margin-bottom: 10px;">
-                {% endif %}
+                    {% if series.google_image %}
+                        <img src="{{ series.google_image }}"
+                            alt="{{ series.title }}"
+                            style="max-width: 200px; margin-bottom: 10px;">
+                    {% endif %}
 
-                <h4>Synopsis</h4>
-                <div>{{ series.synopsis | safe if series.synopsis else "No synopsis available." }}</div>
+                    <h4>Synopsis</h4>
+                    <div>{{ series.synopsis | safe if series.synopsis else "No synopsis available." }}</div>
 
-                <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
+                    <p><strong>Episodes:</strong> {{ series.episodes or "Unknown" }}</p>
 
-            </li>
-        {% endfor %}
-        <button class="btn btn-primary" type="submit">Add to Watch List</button>
-        </ul>
+                </li>
+            {% endfor %}
+            <button class="btn btn-primary" type="submit">Add to Watch List</button>
+            </ul>
+        </form>
     {% endif %}
 
 {% endif %}
