@@ -23,7 +23,7 @@ class WatchList(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    media_name = db.Column(db.String, nullable=False)
+    title = db.Column(db.String, nullable=False)
     watched = db.Column(db.Boolean, default=False)
     rating = db.Column(db.Integer, nullable=True)
     thoughts = db.Column(db.String, nullable=True)
