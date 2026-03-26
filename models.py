@@ -8,9 +8,9 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False,
@@ -19,9 +19,9 @@ class User(db.Model):
 
 
 class WatchList(db.Model):
-    __tablename__ = 'watch_list'
+    __tablename__ = "watch_list"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     title = db.Column(db.String, nullable=False)
     watched = db.Column(db.Boolean, default=False)

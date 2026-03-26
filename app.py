@@ -13,7 +13,7 @@ from helpers.series import get_series
 from helpers.auth import login_required
 from helpers.utils import apology
 from helpers.auth import load_user
-from models import User, db
+from models import User, WatchList, db
 
 app = Flask(__name__, instance_relative_config=True)
 
@@ -168,8 +168,25 @@ def build_list():
 @login_required
 def watch_list():
     user_id = session.get("user_id")
-    user = User.query.filter_by(id=user_id).first()
 
+    if request.method == "POST":
+        title = request.form.get("title")
+
+        new_entry = WatchList(
+            user_id=user_id,
+            title=title,
+            watched=False,
+            rating=None,
+            thoughts=None
+        )
+
+        db.session.add(new_entry)
+        db.session.commit()
+
+        return redirect("/watch_list")
+
+    # GET request, which shows the user's watch list
+    user = User.query.filter_by(id=user_id).first()
     return render_template("watch_list.html", user=user)
 
 
