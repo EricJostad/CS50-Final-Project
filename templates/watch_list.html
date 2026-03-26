@@ -16,6 +16,16 @@
                 <th class="text-end">Thoughts</th>
             </tr>
         </thead>
+        <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td class="text-start">{{ entry.title }}</td>
+                    <td class="text-end">{{ entry.watched }}</td>
+                    <td class="text-end">{{ entry.rating }}</td>
+                    <td class="text-end">{{ entry.thoughts }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 </main>
 {% endblock %}

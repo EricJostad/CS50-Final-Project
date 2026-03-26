@@ -187,7 +187,8 @@ def watch_list():
 
     # GET request, which shows the user's watch list
     user = User.query.filter_by(id=user_id).first()
-    return render_template("watch_list.html", user=user)
+    entries = WatchList.query.filter_by(user_id=user_id).all()
+    return render_template("watch_list.html", user=user, entries=entries)
 
 
 @app.route("/settings")
